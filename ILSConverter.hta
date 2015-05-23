@@ -20,11 +20,24 @@ var oldVal;
 var currencies;
 var exchangeInfo;
 function init(){
-
+try{
 	tInput=document.getElementById("tInput");
 	output=document.getElementById("output");
 	startLoad();
 	download("http://www.boi.org.il/currency.xml",endLoad);
+	}
+	catch(e)
+	{
+		if (e.description.contains("denied") && e.description.contains("permission"))
+		{
+			alert(e.description+", pleasde try to unblock this app by \n*	right clicking \n*	choosing properties\n*	clicking unblock\n		thanks :)");
+		}
+		else
+		{
+			alert("there was an error" + e.description);
+		}
+		return;
+	}
 	setTimeout(trackChange,100);
 	}
 	var eCurrencies;
@@ -152,7 +165,7 @@ var tInput;
 </script>
 </head>
 <body onload="init()">
-<h1>money chnager v. 1.0</h1>
+<h1>money chnager v. 1.1</h1>
 
 <input type="text" id="tInput" name="tInput" /><span>₪</span>
 <div id="currencies">
