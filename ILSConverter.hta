@@ -1,0 +1,169 @@
+﻿<html>
+<!--
+ILS(Israeli new shekels) Converter by Alex Suchman 
+Alexsuh4 at gmail dot com 
+-->
+<head>
+<script type="text/javascript" >
+function trackChange()
+{
+	var val=tInput.value;
+	if(oldVal !== val)
+	{
+		valueChanged();
+		oldVal == val;
+	}
+	setTimeout(trackChange,400);
+
+}
+var oldVal;
+var currencies;
+var exchangeInfo;
+function init(){
+
+	tInput=document.getElementById("tInput");
+	output=document.getElementById("output");
+	startLoad();
+	download("http://www.boi.org.il/currency.xml",endLoad);
+	setTimeout(trackChange,100);
+	}
+	var eCurrencies;
+	var output;
+	function log(msg)
+	{
+		output.innerHTML+=msg+"<br/>";
+	}
+	
+function createView(xmlDoc)
+{
+
+var output=document.getElementById("output");
+
+var nodes=xmlDoc.selectNodes("//CURRENCY");
+
+var i;
+currencies=[];
+exchangeInfo={};
+exchangeInfo.Currencies=currencies;
+exchangeInfo.LastUpdated=xmlDoc.selectSingleNode('/CURRENCIES/LAST_UPDATE').text;
+
+for (i=0; i<nodes.length; i++)
+{
+var data={};
+var node=nodes.nextNode;
+	data['Name']=node.selectSingleNode("./NAME").text;
+	data['Rate']=node.selectSingleNode("./RATE").text;
+	data['CountryCode']=node.selectSingleNode("./CURRENCYCODE").text;
+	data['Country']=node.selectSingleNode("./COUNTRY").text;
+	data['Rate']=node.selectSingleNode("./RATE").text;
+	data['viewElementKey']="input_"+data.Name+"_"+(Math.random()* 1000);
+	currencies[i]=data;	
+}
+
+eCurrencies=document.getElementById("currencies");
+var html="<table>";
+for(var i=0;i<currencies.length;i++)
+{
+
+		html+="<tr>";
+		
+		html+="<td>";
+		html+=currencies[i].Name;
+		html+="</td>";
+		html+="<td>";
+		html+=currencies[i].CountryCode;
+		html+="</td>";
+		html+="<td>";
+		html+=currencies[i].Country;
+		html+="</td>";
+		html+="<td>";
+		var input="<input type='text' name='"+currencies[i].viewElementKey+"' id='"+currencies[i].viewElementKey+"' />"
+		html+=input;
+		//alert(input);
+		html+="</td>";
+		html+="<td>";
+		html+="("+currencies[i].Rate+")";
+		html+="</td>";
+		
+		html+="</tr>";
+		
+}
+html+="</table>";
+
+html+="<div><b>" +"last updated: "+exchangeInfo.LastUpdated+"</b></div>";
+eCurrencies.innerHTML=html;
+//alert(html);
+
+
+}
+
+function download(url,callback){
+var xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+xmlhttp.onreadystatechange=function()
+  {
+  if (xmlhttp.readyState==4 && xmlhttp.status==200)
+    {
+    createView(xmlhttp.responseXML);
+	callback();
+    }
+  }
+xmlhttp.open("GET",url,true);
+xmlhttp.send();
+
+
+}
+
+function startLoad()
+{
+var load=document.getElementById("loaderContainer");
+load.style.display="block";
+document.getElementById("tInput").disabled=true;
+
+}
+function endLoad()
+{
+var load=document.getElementById("loaderContainer");
+load.style.display="none";
+document.getElementById("tInput").disabled=false;
+
+}
+var output;
+function valueChanged()
+{
+	if(!currencies)
+	{
+		return ;
+	}
+	var val=tInput.value;
+	for(var i =0;i<currencies.length;i++)
+	{
+		var obj=currencies[i];
+		var key=obj.viewElementKey;
+
+		var elm=document.getElementById(key);
+		if(!elm)
+		{
+			return;
+		}
+		elm.value=obj.Rate * val;
+	}
+}
+var tInput;
+</script>
+</head>
+<body onload="init()">
+<h1>money chnager v. 1.0</h1>
+
+<input type="text" id="tInput" name="tInput" /><span>₪</span>
+<div id="currencies">
+</div>
+
+<div id="loaderContainer" style="display:none;position:absolute;background-color:white;width:100%;height:100%">
+	<img src="img/ajax-loader.gif"/>
+<span>Loading ... </span>
+	</div>
+
+<div id="output"/>
+
+</body>
+</html>
